@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef struct tree
 {
@@ -71,6 +72,29 @@ void in_order_print(tree * root)
     }
 }
 
+bool is_symbol_bad(char *symbol)
+{
+    bool ret = false;
+
+    size_t wordLen = strlen(symbol);
+    if(wordLen > 5)
+    {
+        printf("Error: Ticker symbol is too long\n");
+        ret = true;
+        return ret;
+    }
+    for(size_t i = 0; i < wordLen; ++i)
+    {
+        if(isupper(symbol[i]) == 0)
+        {
+            printf("Error: ticker symbol should only contain uppercase alphabet!\n");
+            ret = true;
+            break;
+        }
+    }
+    return ret;
+}
+
 tree * input_validation(char *buf)
 {
     tree *root = NULL;
@@ -90,11 +114,16 @@ tree * input_validation(char *buf)
     symbol[wordLen] = '\0';
     symbol = strncpy(symbol, token, wordLen);
     printf("%s\n", symbol);
-    free(symbol);
+    if (is_symbol_bad(symbol))
+    {
+        free(symbol);
+        return NULL;
+    }
 
     token = strtok(NULL, " ");
     wordLen = strlen(token);
-    priceBuf = strncpy(priceBuf, token, wordLen);
+    strncpy(priceBuf, token, wordLen);
+    priceBuf[wordLen] = '\0';
     printf("%s\n", priceBuf);
 
     token = strtok(NULL, "");
