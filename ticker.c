@@ -104,6 +104,8 @@ struct tree *value_tree_insert(tree * root, tree * node)
             root->symbol = node->symbol;
             root->name = node->name;
             root->cents = node->cents;
+            node->symbol = NULL;
+            node->name = NULL;
             root->left = root->right = NULL;
         }
     }
@@ -134,7 +136,7 @@ struct tree * dismantle(tree * root)
     }
     else if(root->right && !root->right->visited)
     {
-        return dismantle(root->right);  
+        return dismantle(root->right);
     }
     else if(!root->visited)
     {
@@ -154,7 +156,7 @@ struct tree * sort_tree(tree * root)
         tmpTree = dismantle(root);
         if(tmpTree)
         {
-            newTree = value_tree_insert(newTree, tmpTree);            
+            newTree = value_tree_insert(newTree, tmpTree);      
         }
         else
         {
@@ -375,10 +377,6 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-//struct tree *value_tree_insert(tree * root, tree * node)
-//struct tree * dismantle(tree * root)
-//struct tree * sort_tree(tree * root)
-
     tree *newTree = NULL;
 
     in_order_print(root);
@@ -386,6 +384,8 @@ int main(int argc, char *argv[])
     newTree = sort_tree(root);
     in_order_print(newTree);
 
+    //Destroy's must be done in this order
+    tree_destroy(newTree);
     tree_destroy(root);
 
 }
