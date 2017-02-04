@@ -96,8 +96,8 @@ struct tree *insert(tree * root, char *symbol, char *name, signed long cents)
             {
                 free(root->name);
                 root->name = name;
-                free(symbol);
             }
+            free(symbol);
         }
         else if (cmpValue < 0)
         {
