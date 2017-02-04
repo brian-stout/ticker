@@ -54,6 +54,28 @@ struct tree *insert(tree * root, char *symbol, char *name, size_t cents)
     return root;
 }
 
+void tree_destroy(tree * root)
+{
+    if(root->symbol)
+    {
+        free(root->symbol);       
+    }
+    if(root->name)
+    {
+        free(root->name);
+    }
+    if(root->left)
+    {
+        tree_destroy(root->left);
+    }
+    if(root->right)
+    {
+        tree_destroy(root->right);
+    }
+
+    free(root);
+}
+
 void in_order_print(tree * root)
 {
     if(root == NULL)
@@ -96,9 +118,12 @@ bool is_symbol_bad(char *symbol)
     {
         if(isupper(symbol[i]) == 0)
         {
-            printf("Error: ticker symbol should only contain uppercase alphabet!\n");
-            ret = true;
-            break;
+            if(symbol[i] != '-')
+            {
+                printf("Error: ticker symbol should only contain uppercase alphabet! or dashes\n");
+                ret = true;
+                break;
+            }
         }
     }
     return ret;
@@ -187,6 +212,23 @@ tree * user_input(tree * root)
     return root;
 }
 
+tree * file_input(tree * root, FILE * fp)
+{
+    char buf[82];
+
+    while(fgets(buf, sizeof(buf), fp))
+    {
+        if(buf[0] == '\n')
+        {
+            continue;
+        }
+        buf[strlen(buf) - 1] = '\0';
+        root = input_validation(root, buf);
+    }
+    return root;
+}
+
+
 int main(int argc, char *argv[])
 {
     if (argc > 2)
@@ -194,18 +236,23 @@ int main(int argc, char *argv[])
         printf("Error, Usage: ./ticker [Stock document]\n");
         return 0;
     }
-    if (argc == 2)
-    {
-        printf("Doing a file %s thing here\n", argv[1]);
-    }
-
-    printf("Regular program\n");
-    //AAAAA +1000000.00  (+64 chars for company name)
 
     tree *root = NULL;
 
+    if (argc == 2)
+    {
+        FILE * fp = fopen(argv[1], "r");
+        root = file_input(root, fp);
+        fclose(fp);
+    }
+
     root = user_input(root);
 
-    in_order_print(root);
+    if(root)
+    {
+        in_order_print(root);
+    }
+
+    tree_destroy(root);
 
 }
