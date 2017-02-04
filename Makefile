@@ -7,13 +7,13 @@ CFLAGS+=-std=c11 -D_GNU_SOURCE
 LDLIBS+=-lm
 
 BIN=ticker
-OBJS=ticker.o
+OBJS=ticker.o stocks.o tree.o
 
 .PHONY: debug profile clean run val
 
 all: $(BIN)
 
-intersector: ticker.o
+ticker: ticker.o stocks.o tree.o
 
 debug: CFLAGS+=-g
 debug: $(BIN)

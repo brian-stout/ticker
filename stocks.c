@@ -47,7 +47,7 @@ tree * input_validation(tree * root, char *buf)
     if (is_symbol_bad(symbol))
     {
         free(symbol);
-        return NULL;
+        return root;
     }
 
     token = strtok(NULL, " \t");
@@ -57,7 +57,7 @@ tree * input_validation(tree * root, char *buf)
         if(*errPtr)
         {
             printf("Error:  Invalid stock dollar value\n");
-            return NULL;
+            return root;
         }
         
         cents = price * 100;
@@ -66,7 +66,7 @@ tree * input_validation(tree * root, char *buf)
     {
         free(symbol);
         printf("Error:  Missing data!\n");
-        return NULL;
+        return root;
     }
 
 
