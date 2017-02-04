@@ -8,7 +8,7 @@ typedef struct tree
 {
     char *symbol;
     char *name;
-    size_t cents;
+    signed long cents;
     struct tree *left;
     struct tree *right;
     bool visited;
@@ -19,7 +19,7 @@ int symbol_compare(tree *root, char *word)
     return strncmp(word, root->symbol, strlen(word));
 }
 
-struct tree *insert(tree * root, char *symbol, char *name, size_t cents)
+struct tree *insert(tree * root, char *symbol, char *name, signed long cents)
 {
     if (root == NULL)
     {
@@ -176,57 +176,24 @@ void in_order_print(tree * root)
     {
         in_order_print(root->left);
     }
-
-    printf("%s %zd", root->symbol, root->cents);
-    if(root->name)
+    if (root->cents >= 0)
     {
-        printf(" %s\n", root->name);
+        printf("%s %ld.%ld", root->symbol, root->cents/100, root->cents%100);
+        if(root->name)
+        {
+            printf(" %s\n", root->name);
+        }
+        else
+        {
+            printf("\n");
+        }
     }
-    else
-    {
-        printf("\n");
-    }
-
     if(root->right)
     {
         in_order_print(root->right);
     }
 }
-/*
-tree * node_retrieve(tree * root, char * symbol)
-{
-        int cmpValue = 0;
-        cmpValue = symbol_compare(root, symbol);
 
-        if (cmpValue == 0)
-        {
-            return root;
-        }
-        else if (cmpValue < 1)
-        {
-            if(root->left)
-            {
-                root->left = node_retrieve(root->left, symbol);
-            }
-            else
-            {
-                return NULL;
-            }
-        }
-        else
-        {
-            if(root->right)
-            {
-                root->right = node_retrieve(root->right, symbol);
-            }
-            else
-            {
-                return NULL;
-            }
-        }
-    return NULL;
-}
-*/
 bool is_symbol_bad(char *symbol)
 {
     bool ret = false;
@@ -234,7 +201,7 @@ bool is_symbol_bad(char *symbol)
     size_t wordLen = strlen(symbol);
     if(wordLen > 5)
     {
-        printf("Error: Ticker symbol is too long\n");
+        printf("Error: Ticker symbol %s is %zd characters too long\n", symbol, wordLen - 5);
         ret = true;
         return ret;
     }
@@ -264,7 +231,7 @@ tree * input_validation(tree * root, char *buf)
     char *name = NULL;
 
 
-    token = strtok(buf, " ");
+    token = strtok(buf, " \t");
     wordLen = strlen(token);
     symbol = malloc(sizeof(char) * wordLen + 1);
 
@@ -277,7 +244,7 @@ tree * input_validation(tree * root, char *buf)
         return NULL;
     }
 
-    token = strtok(NULL, " ");
+    token = strtok(NULL, " \t");
     if(token)
     {
         price = strtod(token, &errPtr);
@@ -379,8 +346,6 @@ int main(int argc, char *argv[])
 
     tree *newTree = NULL;
 
-    in_order_print(root);
-    printf("\n");
     newTree = sort_tree(root);
     in_order_print(newTree);
 
