@@ -13,6 +13,11 @@ typedef struct tree
     struct tree *right;
 }   tree;
 
+typedef struct ordered_list
+{
+    
+}   list;
+
 int symbol_compare(tree *root, char *word)
 {
     return strncmp(word, root->symbol, strlen(word));
@@ -42,7 +47,17 @@ struct tree *insert(tree * root, char *symbol, char *name, size_t cents)
         int cmpValue = 0;
         cmpValue = symbol_compare(root, symbol);
 
-        if (cmpValue < 1)
+        if (cmpValue == 0)
+        {
+            root->cents += cents;
+            if(name)
+            {
+                free(root->name);
+                root->name = name;
+                free(symbol);
+            }
+        }
+        else if (cmpValue < 1)
         {
             root->left = insert(root->left, symbol, name, cents);
         }
@@ -101,6 +116,40 @@ void in_order_print(tree * root)
     {
         in_order_print(root->right);
     }
+}
+
+tree * node_retrieve(tree * root, char * symbol)
+{
+        int cmpValue = 0;
+        cmpValue = symbol_compare(root, symbol);
+
+        if (cmpValue == 0)
+        {
+            return root;
+        }
+        else if (cmpValue < 1)
+        {
+            if(root->left)
+            {
+                root->left = node_retrieve(root->left, symbol);
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            if(root->right)
+            {
+                root->right = node_retrieve(root->right, symbol);
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+    return NULL;
 }
 
 bool is_symbol_bad(char *symbol)
@@ -251,8 +300,7 @@ int main(int argc, char *argv[])
     if(root)
     {
         in_order_print(root);
+        tree_destroy(root);
     }
-
-    tree_destroy(root);
 
 }
