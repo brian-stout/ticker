@@ -11,12 +11,8 @@ typedef struct tree
     size_t cents;
     struct tree *left;
     struct tree *right;
+    bool visited;
 }   tree;
-
-typedef struct ordered_list
-{
-    
-}   list;
 
 int symbol_compare(tree *root, char *word)
 {
@@ -40,6 +36,7 @@ struct tree *insert(tree * root, char *symbol, char *name, size_t cents)
             root->name = name;
             root->cents = cents;
             root->left = root->right = NULL;
+            root->visited = false;
         }
     }
     else
@@ -91,6 +88,82 @@ void tree_destroy(tree * root)
     free(root);
 }
 
+struct tree *value_tree_insert(tree * root, tree * node)
+{
+    if (root == NULL)
+    {
+        root = (tree *) malloc(sizeof(tree));
+
+        if (root == NULL)
+        {
+            printf("Memory Error\n");
+            return NULL;
+        }
+        else
+        {
+            root->symbol = node->symbol;
+            root->name = node->name;
+            root->cents = node->cents;
+            root->left = root->right = NULL;
+        }
+    }
+    else
+    {
+        if(node->cents < root->cents)
+        {
+            root->left = value_tree_insert(root->left, node);
+        }
+        else
+        {
+            root->right = value_tree_insert(root->right, node);
+        }
+    }
+    return root;    
+}
+
+
+
+
+//I need to grab every node in a tree, and insert it into a new tree
+
+struct tree * dismantle(tree * root)
+{
+    if(root->left && !root->left->visited)
+    {
+        return dismantle(root->left);
+    }
+    else if(root->right && !root->right->visited)
+    {
+        return dismantle(root->right);  
+    }
+    else if(!root->visited)
+    {
+        root->visited = true;
+        return root;
+    }
+    return NULL;
+}
+
+struct tree * sort_tree(tree * root)
+{
+    tree * newTree = NULL;
+    tree * tmpTree = NULL;
+
+    while(true)
+    {
+        tmpTree = dismantle(root);
+        if(tmpTree)
+        {
+            newTree = value_tree_insert(newTree, tmpTree);            
+        }
+        else
+        {
+            break;
+        }
+    }
+    return newTree;
+}
+
 void in_order_print(tree * root)
 {
     if(root == NULL)
@@ -117,7 +190,7 @@ void in_order_print(tree * root)
         in_order_print(root->right);
     }
 }
-
+/*
 tree * node_retrieve(tree * root, char * symbol)
 {
         int cmpValue = 0;
@@ -151,7 +224,7 @@ tree * node_retrieve(tree * root, char * symbol)
         }
     return NULL;
 }
-
+*/
 bool is_symbol_bad(char *symbol)
 {
     bool ret = false;
@@ -277,7 +350,6 @@ tree * file_input(tree * root, FILE * fp)
     return root;
 }
 
-
 int main(int argc, char *argv[])
 {
     if (argc > 2)
@@ -297,10 +369,23 @@ int main(int argc, char *argv[])
 
     root = user_input(root);
 
-    if(root)
+    if(!root)
     {
-        in_order_print(root);
-        tree_destroy(root);
+        printf("No data!\n");
+        return 0;
     }
+
+//struct tree *value_tree_insert(tree * root, tree * node)
+//struct tree * dismantle(tree * root)
+//struct tree * sort_tree(tree * root)
+
+    tree *newTree = NULL;
+
+    in_order_print(root);
+    printf("\n");
+    newTree = sort_tree(root);
+    in_order_print(newTree);
+
+    tree_destroy(root);
 
 }
